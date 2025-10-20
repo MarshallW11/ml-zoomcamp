@@ -3,11 +3,10 @@
 
 # In the previous session we trained a model for predicting churn and evaluated it. Now let's deploy it
 
-# In[1]:
-
-
 import pandas as pd
 import numpy as np
+
+import pickle
 
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import KFold
@@ -16,8 +15,12 @@ from sklearn.feature_extraction import DictVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import roc_auc_score
 
+#Parameters
+C = 1.0
+n_splits = 5
 
-# In[2]:
+output_file = f'model_C={C}.bin' 
+output_file
 
 
 df = pd.read_csv('/workspaces/ml-zoomcamp-hw/05-Deploying ML Models/WA_Fn-UseC_-Telco-Customer-Churn.csv')
@@ -35,13 +38,8 @@ df.totalcharges = df.totalcharges.fillna(0)
 df.churn = (df.churn == 'yes').astype(int)
 
 
-# In[3]:
-
-
 df_full_train, df_test = train_test_split(df, test_size=0.2, random_state=1)
 
-
-# In[4]:
 
 
 numerical = ['tenure', 'monthlycharges', 'totalcharges']
@@ -68,14 +66,14 @@ categorical = [
 
 # In[5]:
 
-
+#Training 
 def train(df_train, y_train, C=1.0):
     dicts = df_train[categorical + numerical].to_dict(orient='records')
 
     dv = DictVectorizer(sparse=False)
     X_train = dv.fit_transform(dicts)
 
-    model = LogisticRegression(C=C, max_iter=1000)
+    model = LogisticRegression(C=C, max_iter=10000)
     model.fit(X_train, y_train)
 
     return dv, model
@@ -93,19 +91,11 @@ def predict(df, dv, model):
     return y_pred
 
 
-# In[7]:
-
-
-C = 1.0
-n_splits = 5
-
-
-# In[8]:
-
-
+#print doing validation with various C values
 kfold = KFold(n_splits=n_splits, shuffle=True, random_state=1)
 
 scores = []
+fold = 0
 
 for train_idx, val_idx in kfold.split(df_full_train):
     df_train = df_full_train.iloc[train_idx]
@@ -119,36 +109,29 @@ for train_idx, val_idx in kfold.split(df_full_train):
 
     auc = roc_auc_score(y_val, y_pred)
     scores.append(auc)
+    
+    print(f'auc on fold {fold} is {auc}')
+    fold = fold +1
 
+print('validation results')
 print('C=%s %.3f +- %.3f' % (C, np.mean(scores), np.std(scores)))
-
-
-# In[9]:
 
 
 scores
 
 
-# In[10]:
 
-
+#training final model
+print('trianing final model')
 dv, model = train(df_full_train, df_full_train.churn.values, C=1.0)
 y_pred = predict(df_test, dv, model)
 
 y_test = df_test.churn.values
 auc = roc_auc_score(y_test, y_pred)
-auc
+print(f'auc={auc}')
 
 
 # Save the model
-
-# In[11]:
-
-
-import pickle
-
-
-# In[12]:
 
 
 output_file = f'model_C={C}.bin' 
@@ -170,25 +153,6 @@ with open(output_file, 'wb') as f_out:
     pickle.dump((dv,model), f_out)
 
 
-
-# Load The Model
-
-# In[15]:
-
-
-model_file = 'model_C=1.0.bin'
-
-
-# In[16]:
-
-
-with open(output_file, 'rb') as f_in:
-    dv, model = pickle.load(f_in)
-
-
-# In[17]:
-
-
 customer = {
     'gender': 'female',
     'seniorcitizen': 0,
@@ -212,31 +176,14 @@ customer = {
 }
 
 
-# In[20]:
 
 
 X = dv.transform([customer])
 
 
-# In[21]:
-
 
 model.predict_proba(X)[0,1]
 
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[18]:
 
 
 customer = {
@@ -260,41 +207,13 @@ customer = {
     'monthlycharges': 29.85,
     'totalcharges': 29.85
 }
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
 
 
 
 
 # Making requests
 
-# In[ ]:
 
-
-
-
-
-# In[19]:
-
-
-'
-
-
-# In[ ]:
 
 
 customer = {
@@ -319,26 +238,6 @@ customer = {
     'totalcharges': 29.85
 }
 
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
 
 
 
