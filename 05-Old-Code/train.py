@@ -131,14 +131,11 @@ auc = roc_auc_score(y_test, y_pred)
 print(f'auc={auc}')
 
 
-# Save the model
 
 
 output_file = f'model_C={C}.bin' 
 output_file
 
-
-# In[13]:
 
 
 f_out = open(output_file, 'wb')
@@ -146,7 +143,6 @@ pickle.dump((dv,model), f_out)
 f_out.close()
 
 
-# In[14]:
 
 
 with open(output_file, 'wb') as f_out:
