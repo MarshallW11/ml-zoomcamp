@@ -5,8 +5,6 @@
 # 
 # The code is based on the modules 3 and 4. We use the same dataset: [telco customer churn](https://www.kaggle.com/datasets/blastchar/telco-customer-churn)
 
-# In[103]:
-
 
 import pandas as pd
 import numpy as np
@@ -94,24 +92,3 @@ pipeline = train_model(df)
 save_model('model.bin', pipeline)
 
 
-customer = {
-    'gender': 'male',
-    'seniorcitizen': 0,
-    'partner': 'no',
-    'dependents': 'yes',
-    'phoneservice': 'no',
-    'multiplelines': 'no_phone_service',
-    'internetservice': 'dsl',
-    'onlinesecurity': 'no',
-    'onlinebackup': 'yes',
-    'deviceprotection': 'no',
-    'techsupport': 'no',
-    'streamingtv': 'no',
-    'streamingmovies': 'no',
-    'contract': 'month-to-month',
-    'paperlessbilling': 'yes',
-    'paymentmethod': 'electronic_check',
-    'tenure': 6,
-    'monthlycharges': 29.85,
-    'totalcharges': 129.85
-}
