@@ -1,8 +1,15 @@
-FROM python:3.12.1
-RUN pip install uv
+FROM python:3.13.5-slim-bookworm
+#RUN pip install uv
+
+#best way to install UV
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 WORKDIR /app
+
+ENV PATH="/app/.venv/bin:$PATH"
+
 COPY ".python-version" "pyproject.toml" "uv.lock" ./
+
 
 RUN uv sync --locked
 
